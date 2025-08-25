@@ -1,0 +1,37 @@
+:root {
+  --bg: #0b0b0c;
+  --card: #141417;
+  --text: #f5f5f7;
+  --muted: #b7b7c0;
+  --team-a: #2e7dd7;
+  --team-b: #d94a4a;
+  --accent: #f0b90b; 
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+}
+.container { max-width: 960px; margin: 24px auto; padding: 16px; }
+.grid { display: grid; gap: 16px; }
+.card {
+  background: var(--card); border-radius: 16px; padding: 16px; box-shadow: 0 6px 24px rgba(0,0,0,.3);
+}
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.center { display: grid; place-items: center; }
+.h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: .5px; }
+.digits { font-variant-numeric: tabular-nums; font-size: clamp(48px, 7vw, 80px); font-weight: 800; }
+.label { color: var(--muted); font-size: 14px; }
+.btn {
+  border: none; border-radius: 12px; padding: 10px 14px; cursor: pointer; font-weight: 600;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid #2b2b33; }
+.btn-a { background: var(--team-a); color: #fff; }
+.btn-b { background: var(--team-b); color: #fff; }
+.btn-accent { background: var(--accent); color: #111; }
+.panel { display: grid; gap: 8px; }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.badge { font-size: 12px; padding: 4px 8px; border-radius: 999px; background: #23232a; color: var(--muted); }
+.warning { outline: 2px solid var(--accent); }/* You can add global styles to this file, and also import other style files */

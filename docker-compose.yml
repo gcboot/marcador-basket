@@ -1,0 +1,30 @@
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Scoreboard.Api/Dockerfile
+    container_name: scoreboard-api
+    environment:
+      - ConnectionStrings__Sql=Server=host.docker.internal,14333;Database=ScoreboardDb;User=sa;Password=VcunBlopez123;TrustServerCertificate=True
+      - Scoring__FoulPenalty=1
+      - DOTNET_RUNNING_IN_CONTAINER=true
+    ports:
+      - "5071:8080"
+    networks:
+      - scoreboard-net
+
+  frontend:
+    build:
+      context: ./frontend/scoreboard
+      dockerfile: Dockerfile
+    container_name: scoreboard-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    networks:
+      - scoreboard-net
+
+networks:
+  scoreboard-net:
+    driver: bridge

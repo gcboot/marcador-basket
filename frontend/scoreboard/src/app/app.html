@@ -1,0 +1,84 @@
+<div class="scoreboard" [@gameState]="status()">
+  <div class="header">
+    <div class="quarter">
+      <span>Cuarto</span>
+      <h2>{{ quarter() }} / 4</h2>
+    </div>
+
+    <div class="timer">
+      <span>Tiempo</span>
+      <h1>{{ minutes() }}:{{ seconds() | number:'2.0-0' }}</h1>
+    </div>
+
+    <div class="duration">
+      <span>Duración cuarto</span>
+      <div class="controls">
+        <button (click)="changeQuarterDuration(-1)">-</button>
+        <span>{{ quarterMinutes() }} min</span>
+        <button (click)="changeQuarterDuration(1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scores">
+    <div class="team home">
+      <h3>LOCAL</h3>
+      <h1>{{ scoreHome() }}</h1>
+      <p>Faltas: {{ foulsHome() }}</p>
+    </div>
+    <div class="vs">vs</div>
+    <div class="team away">
+      <h3>VISITANTE</h3>
+      <h1>{{ scoreAway() }}</h1>
+      <p>Faltas: {{ foulsAway() }}</p>
+    </div>
+  </div>
+
+  <div class="controls-main">
+    <button class="start" (click)="start()">Iniciar</button>
+    <button class="reset" (click)="reset()">Reiniciar tiempo</button>
+    <button class="next" (click)="nextQuarter()">Siguiente cuarto</button>
+    <button class="new-game" (click)="newGame()">Nuevo juego</button>
+  </div>
+
+  <div class="controls-points">
+    <div class="local-controls">
+      <button (click)="add('home', 1)">+1 Local</button>
+      <button (click)="add('home', 2)">+2 Local</button>
+      <button (click)="add('home', 3)">+3 Local</button>
+      <button (click)="sub('home')">−1 Local</button>
+    </div>
+    <div class="visitor-controls">
+      <button (click)="add('away', 1)">+1 Visitante</button>
+      <button (click)="add('away', 2)">+2 Visitante</button>
+      <button (click)="add('away', 3)">+3 Visitante</button>
+      <button (click)="sub('away')">−1 Visitante</button>
+    </div>
+  </div>
+
+  <div class="controls-fouls">
+    <button class="foul-home" (click)="foul('home')">Falta Local</button>
+    <button class="foul-away" (click)="foul('away')">Falta Visitante</button>
+  </div>
+
+  <!-- Estado del juego -->
+  <div class="controls-status">
+    <h3>Estado del Juego</h3>
+    <p>Actual: {{ status() }}</p>
+
+    <button class="finish" (click)="finishGame()">Finalizar</button>
+    <button class="cancel" (click)="cancelGame()">Cancelar</button>
+    <button class="suspend" (click)="suspendGame()">Suspender</button>
+
+    <!-- Dinámico: Pausa/Reanudar persistente en BD -->
+    <button *ngIf="status() === 'running'" class="pause" (click)="pauseGame()">Pausa</button>
+    <button *ngIf="status() === 'paused'" class="resume" (click)="resumeGame()">Reanudar</button>
+
+    <div class="join-game">
+      <h4>Unirse a un juego existente</h4>
+      <input type="number" #gameId placeholder="ID del juego">
+      <button (click)="connectToGame(+gameId.value)">Unirme al juego</button>
+    </div>
+
+  </div>
+</div>
