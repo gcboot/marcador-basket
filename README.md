@@ -4,6 +4,10 @@ Aplicación de **marcador de básquetbol** con soporte para **sincronización en
 El proyecto está preparado para correr tanto de manera local como dentro de **Docker**.
 
 ---
+### Arquitectura del proyecto 
+
+![Arquitectura_angular_c#](./arquitectura_marcador_basquetball.png)
+
 
 ### 📦 Requisitos previos
 
@@ -21,6 +25,8 @@ ng version
 dotnet --version
 ```
 ### Estructura del proyecto
+
+```plaintext
 marcador-basket/
 ├── backend/
 │   └── Scoreboard.Api/
