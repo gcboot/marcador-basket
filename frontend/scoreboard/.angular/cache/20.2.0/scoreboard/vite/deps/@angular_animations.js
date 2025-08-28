@@ -38,7 +38,8 @@ import "./chunk-HWYXSU2G.js";
 import "./chunk-MARUHEWW.js";
 import "./chunk-J25FJFZE.js";
 
-// node_modules/@angular/animations/fesm2022/animations.mjs
+// node_modules/@angular/animations/fesm2022/animations.mjs  
+// → Archivo de animaciones de Angular
 var AnimationBuilder = class _AnimationBuilder {
   static ɵfac = function AnimationBuilder_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _AnimationBuilder)();
@@ -225,13 +226,13 @@ export {
   BrowserAnimationBuilder as ɵBrowserAnimationBuilder,
   ɵPRE_STYLE
 };
-/*! Bundled license information:
+/*! Información de licencia incluida:
 
 @angular/animations/fesm2022/animations.mjs:
   (**
    * @license Angular v20.2.1
    * (c) 2010-2025 Google LLC. https://angular.io/
-   * License: MIT
+   * Licencia: MIT
    *)
 */
 //# sourceMappingURL=@angular_animations.js.map

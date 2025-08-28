@@ -10,7 +10,7 @@ WORKDIR "/src/Scoreboard.Api"
 RUN dotnet build "Scoreboard.Api.csproj" -c Release -o /app/build
 RUN dotnet publish "Scoreboard.Api.csproj" -c Release -o /app/publish
 
-# Etapa de runtime
+# Etapa de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .

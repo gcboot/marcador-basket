@@ -9,7 +9,7 @@ using Scoreboard.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------- Configuración ----------
+// ---------- Configuracion ----------
 var cs = builder.Configuration.GetConnectionString("Sql")
     ?? Environment.GetEnvironmentVariable("ConnectionStrings__Sql");
 
@@ -30,14 +30,14 @@ builder.Services.AddControllers()
         opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-// Swagger (disponible en Dev y Prod)
+// Swagger (disponible en Desarrollo y Producción)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Scoreboard API", Version = "v1" });
 });
 
-// ---------- Build ----------
+// ---------- Constructor ----------
 var app = builder.Build();
 
 // ---------- Middleware ----------
@@ -54,7 +54,7 @@ app.UseSwaggerUI(c =>
 // ---------- SignalR ----------
 app.MapHub<GameHub>("/hub/game");
 
-// ---------- Endpoints ----------
+// Comunicación en tiempo real con SignalR
 app.MapGet("/api/games", async (AppDb db) =>
     await db.Games.AsNoTracking().OrderByDescending(g => g.Id).ToListAsync()
 );
@@ -179,5 +179,5 @@ app.MapPost("/api/games/{id:int}/finish", async (
     return Results.Ok(g);
 });
 
-// ---------- Run ----------
+// ---------- Ejecutar ----------
 app.Run();

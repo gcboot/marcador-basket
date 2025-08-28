@@ -2689,7 +2689,7 @@ var TransitionAnimationEngine = class {
   namespacesByHostElement = /* @__PURE__ */ new Map();
   collectedEnterElements = [];
   collectedLeaveElements = [];
-  // this method is designed to be overridden by the code that uses this engine
+// este método está diseñado para ser sobrescrito por el código que utiliza este motor
   onRemovalComplete = (element, context) => {
   };
   /** @internal */
@@ -3603,7 +3603,7 @@ var AnimationEngine = class {
   _transitionEngine;
   _timelineEngine;
   _triggerCache = {};
-  // this method is designed to be overridden by the code that uses this engine
+  // este método está diseñado para ser sobrescrito por el código que usa este motor
   onRemovalComplete = (element, context) => {
   };
   constructor(doc, _driver, _normalizer) {
@@ -3771,9 +3771,10 @@ var WebAnimationsPlayer = class {
   _started = false;
   _destroyed = false;
   _finalKeyframe;
-  // the following original fns are persistent copies of the _onStartFns and _onDoneFns
-  // and are used to reset the fns to their original values upon reset()
-  // (since the _onStartFns and _onDoneFns get deleted after they are called)
+  // las siguientes funciones originales son copias persistentes de _onStartFns y _onDoneFns
+  // y se utilizan para restablecer las funciones a sus valores originales al ejecutar reset()
+  // (ya que _onStartFns y _onDoneFns se eliminan después de ser llamadas)
+
   _originalOnDoneFns = [];
   _originalOnStartFns = [];
   // using non-null assertion because it's re(set) by init();
@@ -3985,8 +3986,8 @@ var BaseAnimationRenderer = class {
   delegate;
   engine;
   _onDestroy;
-  // We need to explicitly type this property because of an api-extractor bug
-  // See https://github.com/microsoft/rushstack/issues/4390
+// Necesitamos tipar explícitamente esta propiedad debido a un error en api-extractor
+// Ver https://github.com/microsoft/rushstack/issues/4390
   ɵtype = 0;
   constructor(namespaceId, delegate, engine, _onDestroy) {
     this.namespaceId = namespaceId;
@@ -4231,9 +4232,10 @@ var AnimationRendererFactory = class {
 
 // node_modules/@angular/platform-browser/fesm2022/animations.mjs
 var InjectableAnimationEngine = class _InjectableAnimationEngine extends AnimationEngine {
-  // The `ApplicationRef` is injected here explicitly to force the dependency ordering.
-  // Since the `ApplicationRef` should be created earlier before the `AnimationEngine`, they
-  // both have `ngOnDestroy` hooks and `flush()` must be called after all views are destroyed.
+// `ApplicationRef` se inyecta aquí explícitamente para forzar el orden de las dependencias.
+// Dado que `ApplicationRef` debe crearse antes que `AnimationEngine`, ambos
+// tienen hooks `ngOnDestroy` y `flush()` debe llamarse después de que todas las vistas sean destruidas.
+
   constructor(doc, driver, normalizer) {
     super(doc, driver, normalizer);
   }
@@ -4301,21 +4303,22 @@ var BROWSER_ANIMATIONS_PROVIDERS = [
 ];
 var BrowserAnimationsModule = class _BrowserAnimationsModule {
   /**
-   * Configures the module based on the specified object.
-   *
-   * @param config Object used to configure the behavior of the `BrowserAnimationsModule`.
-   * @see {@link BrowserAnimationsModuleConfig}
-   *
-   * @usageNotes
-   * When registering the `BrowserAnimationsModule`, you can use the `withConfig`
-   * function as follows:
-   * ```ts
-   * @NgModule({
-   *   imports: [BrowserAnimationsModule.withConfig(config)]
-   * })
-   * class MyNgModule {}
-   * ```
-   */
+ * Configura el módulo en función del objeto especificado.
+ *
+ * @param config Objeto usado para configurar el comportamiento de `BrowserAnimationsModule`.
+ * @see {@link BrowserAnimationsModuleConfig}
+ *
+ * @usageNotes
+ * Al registrar `BrowserAnimationsModule`, puedes usar la función `withConfig`
+ * de la siguiente manera:
+ * ```ts
+ * @NgModule({
+ *   imports: [BrowserAnimationsModule.withConfig(config)]
+ * })
+ * class MiNgModule {}
+ * ```
+ */
+
   static withConfig(config) {
     return {
       ngModule: _BrowserAnimationsModule,
@@ -4380,7 +4383,7 @@ export {
   provideNoopAnimations,
   InjectableAnimationEngine as ɵInjectableAnimationEngine
 };
-/*! Bundled license information:
+/*! Información de licencia incluida:
 
 @angular/animations/fesm2022/util.mjs:
 @angular/animations/fesm2022/browser.mjs:
@@ -4388,7 +4391,8 @@ export {
   (**
    * @license Angular v20.2.1
    * (c) 2010-2025 Google LLC. https://angular.io/
-   * License: MIT
+   * Licencia: MIT
    *)
 */
 //# sourceMappingURL=@angular_platform-browser_animations.js.map
+
