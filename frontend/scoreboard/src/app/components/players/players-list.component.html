@@ -1,0 +1,35 @@
+<h2>👥 Jugadores</h2>
+<button (click)="createPlayer()">➕ Crear Jugador</button>
+
+<div *ngIf="loading">Cargando jugadores...</div>
+<div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+<table *ngIf="!loading && players.length > 0; else noPlayers">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Número</th>
+      <th>Posición</th>
+      <th>Equipo</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let p of players">
+      <td>{{ p.id }}</td>
+      <td>{{ p.name }}</td>
+      <td>{{ p.number }}</td>
+      <td>{{ p.position }}</td>
+      <td>{{ p.team?.name }}</td>
+      <td>
+        <button (click)="editPlayer(p.id)">✏️ Editar</button>
+        <button (click)="deletePlayer(p.id)">🗑 Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<ng-template #noPlayers>
+  <p>⚠️ No hay jugadores registrados.</p>
+</ng-template>

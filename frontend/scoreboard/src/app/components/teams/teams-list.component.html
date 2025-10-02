@@ -1,0 +1,31 @@
+<h2>🏀 Equipos</h2>
+<button (click)="createTeam()">➕ Crear Equipo</button>
+
+<div *ngIf="loading">Cargando equipos...</div>
+<div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+<table *ngIf="!loading && teams.length > 0; else noTeams">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Jugadores</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let t of teams">
+      <td>{{ t.id }}</td>
+      <td>{{ t.name }}</td>
+      <td>{{ t.players?.length || 0 }}</td>
+      <td>
+        <button (click)="editTeam(t.id)">✏️ Editar</button>
+        <button (click)="deleteTeam(t.id)">🗑 Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<ng-template #noTeams>
+  <p>⚠️ No hay equipos registrados.</p>
+</ng-template>

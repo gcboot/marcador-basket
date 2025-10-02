@@ -5,6 +5,7 @@ namespace Scoreboard.Api.Models
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public int Number { get; set; }
+        public string? Position { get; set; }
 
         // 🔑 Llave foránea a Team
         public int TeamId { get; set; }

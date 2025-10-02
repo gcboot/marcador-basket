@@ -15,6 +15,7 @@ import { RouterModule } from '@angular/router';
         <li><a routerLink="/teams">Equipos</a></li>
         <li><a routerLink="/players">Jugadores</a></li>
         <li><a routerLink="/games">Partidos</a></li>
+        <li><a routerLink="/users">Usuarios</a></li> 
         <li><a (click)="logout()">Cerrar Sesión</a></li>
       </ul>
     </nav>

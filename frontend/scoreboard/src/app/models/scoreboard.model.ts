@@ -43,3 +43,10 @@ export interface Game {
 
   events: Event[];
 }
+
+
+export interface User {
+  id: number;
+  username: string;
+  rol: string;   // 👈 debe coincidir con la columna Rol de tu DB
+}

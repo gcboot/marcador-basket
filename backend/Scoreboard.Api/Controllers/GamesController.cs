@@ -60,7 +60,6 @@ namespace Scoreboard.Api.Controllers
             if (game.HomeTeamId == 0 || game.AwayTeamId == 0)
                 return BadRequest("Debes especificar equipos local y visitante");
 
-            // validar que existan equipos
             if (!await _db.Teams.AnyAsync(t => t.Id == game.HomeTeamId) ||
                 !await _db.Teams.AnyAsync(t => t.Id == game.AwayTeamId))
                 return BadRequest("Alguno de los equipos no existe");
@@ -74,6 +73,43 @@ namespace Scoreboard.Api.Controllers
             await _hub.Clients.All.SendAsync("GameCreated", game);
 
             return CreatedAtAction(nameof(GetGame), new { id = game.Id }, game);
+        }
+
+        // 📌 PUT /api/games/{id}
+        [HttpPut("{id:int}")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> UpdateGame(int id, [FromBody] Game game)
+        {
+            if (id != game.Id) return BadRequest();
+
+            var existing = await _db.Games.FindAsync(id);
+            if (existing == null) return NotFound();
+
+            existing.HomeTeamId = game.HomeTeamId;
+            existing.AwayTeamId = game.AwayTeamId;
+            existing.Status = game.Status;
+            existing.Quarter = game.Quarter;
+            existing.HomeScore = game.HomeScore;
+            existing.AwayScore = game.AwayScore;
+
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
+
+        // 📌 DELETE /api/games/{id}
+        [HttpDelete("{id:int}")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> DeleteGame(int id)
+        {
+            var game = await _db.Games.FindAsync(id);
+            if (game == null) return NotFound();
+
+            _db.Games.Remove(game);
+            await _db.SaveChangesAsync();
+
+            await _hub.Clients.All.SendAsync("GameDeleted", id);
+
+            return NoContent();
         }
 
         // 📌 POST /api/games/{id}/quarter/next

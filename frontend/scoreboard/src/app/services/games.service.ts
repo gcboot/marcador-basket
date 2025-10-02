@@ -9,9 +9,12 @@ import { Game, Event } from '../models/scoreboard.model';
 export class GamesService {
   private hubConnection?: HubConnection;
   private gameUpdated$ = new Subject<Game>();
-  private currentGame: Game | null = null; // 👈 mantenemos último estado
+  private currentGame: Game | null = null;
 
-  constructor(private http: HttpClient, @Inject(APP_CONFIG) private config: AppConfig) {}
+  constructor(
+    private http: HttpClient,
+    @Inject(APP_CONFIG) private config: AppConfig
+  ) {}
 
   // -------- REST API --------
   getGames(): Observable<Game[]> {
@@ -26,14 +29,23 @@ export class GamesService {
     return this.http.post<Game>(`${this.config.apiUrl}/Games`, game);
   }
 
-  addScore(id: number, teamId: number, playerId: number, points: number): Observable<Game> {
-    const body: Partial<Event> = { teamId, playerId, points, eventType: 'score' };
-    return this.http.post<Game>(`${this.config.apiUrl}/Games/${id}/score`, body);
+  updateGame(id: number, game: Partial<Game>): Observable<void> {
+    return this.http.put<void>(`${this.config.apiUrl}/Games/${id}`, game);
   }
 
-  addFoul(id: number, teamId: number, playerId: number): Observable<Game> {
-    const body: Partial<Event> = { teamId, playerId, eventType: 'foul', points: 0 };
-    return this.http.post<Game>(`${this.config.apiUrl}/Games/${id}/foul`, body);
+  deleteGame(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.config.apiUrl}/Games/${id}`);
+  }
+
+  // -------- Eventos (ahora van al controlador /Events) --------
+  addScore(gameId: number, teamId: number, playerId: number, points: number): Observable<Game> {
+    const body: Partial<Event> = { gameId, teamId, playerId, points, eventType: 'score' };
+    return this.http.post<Game>(`${this.config.apiUrl}/Events/score`, body);
+  }
+
+  addFoul(gameId: number, teamId: number, playerId: number): Observable<Game> {
+    const body: Partial<Event> = { gameId, teamId, playerId, eventType: 'foul', points: 0 };
+    return this.http.post<Game>(`${this.config.apiUrl}/Events/foul`, body);
   }
 
   nextQuarter(id: number): Observable<Game> {
@@ -60,17 +72,24 @@ export class GamesService {
     this.hubConnection.on('ScoreUpdated', (update: Game) => this.emitUpdate(update));
     this.hubConnection.on('FoulUpdated', (update: Game) => this.emitUpdate(update));
     this.hubConnection.on('GameStatusUpdated', (update: Game) => this.emitUpdate(update));
-
     this.hubConnection.on('QuarterUpdated', (quarter: number) => {
       if (this.currentGame) {
         this.currentGame.quarter = quarter;
         this.gameUpdated$.next(this.currentGame);
       }
     });
+
+    // ✅ Nuevo: manejar eliminación de juegos
+    this.hubConnection.on('GameDeleted', (gameId: number) => {
+      console.log(`🗑 Juego eliminado desde SignalR: ${gameId}`);
+      if (this.currentGame && this.currentGame.id === gameId) {
+        this.currentGame = null;
+      }
+    });
   }
 
   private emitUpdate(game: Game) {
-    this.currentGame = game; // guardamos el último
+    this.currentGame = game;
     this.gameUpdated$.next(game);
   }
 

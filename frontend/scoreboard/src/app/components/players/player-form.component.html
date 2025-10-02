@@ -1,0 +1,30 @@
+<h2>{{ isEdit ? '✏️ Editar Jugador' : '➕ Crear Jugador' }}</h2>
+
+<form (ngSubmit)="save()" #form="ngForm" class="form-container">
+  <label>
+    Nombre:
+    <input type="text" [(ngModel)]="player.name" name="name" required />
+  </label>
+
+  <label>
+    Número:
+    <input type="number" [(ngModel)]="player.number" name="number" required />
+  </label>
+
+  <label>
+    Posición:
+    <input type="text" [(ngModel)]="player.position" name="position" />
+  </label>
+
+  <label>
+    Equipo:
+    <select [(ngModel)]="player.teamId" name="teamId" required>
+      <option *ngFor="let t of teams" [value]="t.id">{{ t.name }}</option>
+    </select>
+  </label>
+
+  <div class="actions">
+    <button type="submit">{{ isEdit ? '💾 Guardar' : '➕ Crear' }}</button>
+    <button type="button" (click)="router.navigate(['/players'])">Cancelar</button>
+  </div>
+</form>

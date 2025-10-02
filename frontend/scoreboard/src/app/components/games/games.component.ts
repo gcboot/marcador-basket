@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // ✅ necesario para [(ngModel)]
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GamesService } from '../../services/games.service';
 import { Game } from '../../models/scoreboard.model';
@@ -9,9 +9,9 @@ import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-games',
   standalone: true,
-  imports: [CommonModule, FormsModule], // ✅ agregar FormsModule
+  imports: [CommonModule, FormsModule],
   templateUrl: './games.component.html',
-  //styleUrls: ['./games.component.css']
+  styleUrls: ['./games.component.css']
 })
 export class GamesComponent implements OnInit {
   games: Game[] = [];
@@ -31,14 +31,22 @@ export class GamesComponent implements OnInit {
   }
 
   loadGames() {
-    this.gamesService.getGames().subscribe((data: Game[]) => {
-      this.games = data;
+    this.gamesService.getGames().subscribe({
+      next: (data: Game[]) => {
+        this.games = data;
+      },
+      error: (err) => {
+        console.error('Error cargando juegos:', err);
+      }
     });
   }
 
   loadTeams() {
     this.http.get<any[]>(`http://localhost:5071/api/Teams`)
-      .subscribe(data => this.teams = data);
+      .subscribe({
+        next: data => this.teams = data,
+        error: err => console.error('Error cargando equipos:', err)
+      });
   }
 
   createGame() {
@@ -53,10 +61,23 @@ export class GamesComponent implements OnInit {
       status: 'paused'
     };
 
-    this.gamesService.createGame(nuevo).subscribe(() => this.loadGames());
+    this.gamesService.createGame(nuevo).subscribe({
+      next: () => this.loadGames(),
+      error: err => console.error('Error creando juego:', err)
+    });
   }
 
   goToScoreboard(id: number) {
     this.router.navigate(['/scoreboard'], { queryParams: { id } });
+  }
+
+  // 🔹 Falta este método
+  deleteGame(id: number) {
+    if (confirm('¿Seguro que deseas eliminar este partido?')) {
+      this.gamesService.deleteGame(id).subscribe({
+        next: () => this.loadGames(),
+        error: err => console.error('Error eliminando juego:', err)
+      });
+    }
   }
 }

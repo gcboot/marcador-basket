@@ -1,0 +1,17 @@
+<h2>{{ isEdit ? '✏️ Editar Equipo' : '➕ Crear Equipo' }}</h2>
+
+<form (ngSubmit)="save()" #form="ngForm" class="form-container">
+  <label>
+    Nombre del equipo:
+    <input type="text" [(ngModel)]="team.name" name="name" required />
+  </label>
+
+  <!-- Si en el futuro agregas más campos (ej: ciudad, logo) los pondrías aquí -->
+
+  <div class="actions">
+    <button type="submit">
+      {{ isEdit ? '💾 Guardar' : '➕ Crear' }}
+    </button>
+    <button type="button" (click)="router.navigate(['/teams'])">Cancelar</button>
+  </div>
+</form>

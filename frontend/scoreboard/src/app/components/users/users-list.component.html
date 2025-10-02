@@ -1,0 +1,36 @@
+<h2 class="title">👥 Usuarios</h2>
+
+<button class="btn-create" (click)="goToCreate()">➕ Crear Usuario</button>
+
+<div *ngIf="loading" class="loading">Cargando usuarios...</div>
+<div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+<table *ngIf="!loading && users.length > 0; else noUsers" class="users-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Usuario</th>
+      <th>Rol</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let u of users">
+      <td>{{ u.id }}</td>
+      <td>{{ u.username }}</td>
+      <td>
+        <span class="tag" [ngClass]="u.rol === 'admin' ? 'admin' : 'user'">
+          {{ u.rol }}
+        </span>
+      </td>
+      <td>
+        <button class="btn-edit" (click)="editUser(u.id)">✏️ Editar</button>
+        <button class="btn-delete" (click)="deleteUser(u.id)">🗑 Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<ng-template #noUsers>
+  <p class="no-users">⚠️ No hay usuarios registrados.</p>
+</ng-template>

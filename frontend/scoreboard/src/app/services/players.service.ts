@@ -1,24 +1,38 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { APP_CONFIG, AppConfig } from '../app.config';
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface Player {
+  id: number;
+  name: string;
+  number: number;
+  position: string;
+  teamId: number;
+  team?: { id: number; name: string };
+}
+
+@Injectable({ providedIn: 'root' })
 export class PlayersService {
-  private apiUrl = 'http://localhost:5071/api/Players';
+  constructor(private http: HttpClient, @Inject(APP_CONFIG) private config: AppConfig) {}
 
-  constructor(private http: HttpClient) {}
-
-  getPlayers(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+  getPlayers(): Observable<Player[]> {
+    return this.http.get<Player[]>(`${this.config.apiUrl}/Players`);
   }
 
-  createPlayer(player: any): Observable<any> {
-    return this.http.post(this.apiUrl, player);
+  getPlayer(id: number): Observable<Player> {
+    return this.http.get<Player>(`${this.config.apiUrl}/Players/${id}`);
   }
 
-  assignToTeam(playerId: number, teamId: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${playerId}/team/${teamId}`, {});
+  createPlayer(player: Partial<Player>): Observable<Player> {
+    return this.http.post<Player>(`${this.config.apiUrl}/Players`, player);
+  }
+
+  updatePlayer(id: number, player: Partial<Player>): Observable<void> {
+    return this.http.put<void>(`${this.config.apiUrl}/Players/${id}`, player);
+  }
+
+  deletePlayer(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.config.apiUrl}/Players/${id}`);
   }
 }

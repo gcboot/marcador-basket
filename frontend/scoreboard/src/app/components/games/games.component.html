@@ -1,9 +1,41 @@
-<div>
-  <h2>Partidos</h2>
-  <button (click)="createGame()">Nuevo Partido</button>
-  <ul>
-    <li *ngFor="let g of games">
-      {{ g.id }} - {{ g.status }} - {{ g.homeScore }} vs {{ g.awayScore }}
-    </li>
-  </ul>
+<h2>🏀 Partidos</h2>
+
+<!-- Formulario crear partido -->
+<div class="create-game">
+  <label>
+    Local:
+    <select [(ngModel)]="selectedHomeTeamId">
+      <option [ngValue]="null">Selecciona equipo</option>
+      <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
+    </select>
+  </label>
+
+  <label>
+    Visitante:
+    <select [(ngModel)]="selectedAwayTeamId">
+      <option [ngValue]="null">Selecciona equipo</option>
+      <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
+    </select>
+  </label>
+
+  <button class="create-btn" (click)="createGame()">➕ Nuevo Partido</button>
+</div>
+
+<!-- Lista de partidos -->
+<div class="games-list">
+  <div *ngFor="let g of games" class="game-card">
+    <div class="game-info game-teams">
+      {{ g.homeTeam?.name || 'Equipo Local' }} vs {{ g.awayTeam?.name || 'Equipo Visitante' }}
+    </div>
+    <div class="game-info">
+      Estado: <strong>{{ g.status }}</strong>
+    </div>
+    <div class="game-info">
+      Marcador: {{ g.homeScore }} - {{ g.awayScore }}
+    </div>
+    <div>
+      <button class="btn-play" (click)="goToScoreboard(g.id)">▶ Ver Marcador</button>
+      <button class="btn-delete" (click)="deleteGame(g.id)">🗑 Eliminar</button>
+    </div>
+  </div>
 </div>
