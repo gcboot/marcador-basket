@@ -60,6 +60,31 @@ namespace Scoreboard.Api.Migrations
                     b.ToTable("Games");
                 });
 
+            modelBuilder.Entity("Scoreboard.Api.Models.Player", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Players");
+                });
+
             modelBuilder.Entity("Scoreboard.Api.Models.ScoreEvent", b =>
                 {
                     b.Property<int>("Id")
@@ -92,6 +117,59 @@ namespace Scoreboard.Api.Migrations
                     b.ToTable("Events");
                 });
 
+            modelBuilder.Entity("Scoreboard.Api.Models.Team", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("Scoreboard.Api.Models.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("Scoreboard.Api.Models.Player", b =>
+                {
+                    b.HasOne("Scoreboard.Api.Models.Team", "Team")
+                        .WithMany("Players")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("Scoreboard.Api.Models.ScoreEvent", b =>
                 {
                     b.HasOne("Scoreboard.Api.Models.Game", "Game")
@@ -106,6 +184,11 @@ namespace Scoreboard.Api.Migrations
             modelBuilder.Entity("Scoreboard.Api.Models.Game", b =>
                 {
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("Scoreboard.Api.Models.Team", b =>
+                {
+                    b.Navigation("Players");
                 });
 #pragma warning restore 612, 618
         }

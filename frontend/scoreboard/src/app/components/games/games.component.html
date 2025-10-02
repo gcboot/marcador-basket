@@ -1,0 +1,9 @@
+<div>
+  <h2>Partidos</h2>
+  <button (click)="createGame()">Nuevo Partido</button>
+  <ul>
+    <li *ngFor="let g of games">
+      {{ g.id }} - {{ g.status }} - {{ g.homeScore }} vs {{ g.awayScore }}
+    </li>
+  </ul>
+</div>

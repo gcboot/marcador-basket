@@ -1,7 +1,4 @@
-using System.Text.Json.Serialization;
-
 namespace Scoreboard.Api.Models
-
 {
     public class Game
     {
@@ -13,7 +10,16 @@ namespace Scoreboard.Api.Models
         public int AwayScore { get; set; }
         public int HomeFouls { get; set; }
         public int AwayFouls { get; set; }
-        public string Status { get; set; } = "running"; 
+        public string Status { get; set; } = "paused";
+
+        // 🔑 Llaves foráneas a Teams
+        public int HomeTeamId { get; set; }
+        public Team? HomeTeam { get; set; }
+
+        public int AwayTeamId { get; set; }
+        public Team? AwayTeam { get; set; }
+
+        // Relación con eventos
         public List<ScoreEvent> Events { get; set; } = new();
     }
 
@@ -21,13 +27,18 @@ namespace Scoreboard.Api.Models
     {
         public int Id { get; set; }
         public int GameId { get; set; }
-
-        [JsonIgnore] 
         public Game? Game { get; set; }
 
-        public string Team { get; set; } = "home";
+        // 🔑 Referencia al equipo
+        public int TeamId { get; set; }
+        public Team? Team { get; set; }
+
+        // 🔑 Referencia opcional al jugador
+        public int? PlayerId { get; set; }
+        public Player? Player { get; set; }
+
+        public string EventType { get; set; } = "score"; // score o foul
         public int Points { get; set; }
         public DateTimeOffset At { get; set; } = DateTimeOffset.UtcNow;
-        public string Type { get; set; } = "score"; 
     }
 }

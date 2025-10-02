@@ -1,0 +1,92 @@
+<div class="scoreboard" *ngIf="game() as g; else noGame">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="quarter">
+      <span>Cuarto</span>
+      <h2>{{ quarter() }} / 4</h2>
+    </div>
+
+    <div class="timer">
+      <span>Tiempo</span>
+      <h1>{{ minutes() }}:{{ seconds() | number:'2.0-0' }}</h1>
+    </div>
+
+    <div class="duration">
+      <span>Duración cuarto</span>
+      <div class="controls">
+        <button (click)="changeQuarterDuration(-1)">-</button>
+        <span>{{ quarterMinutes() }} min</span>
+        <button (click)="changeQuarterDuration(1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCORES -->
+  <div class="scores">
+    <!-- LOCAL -->
+    <div class="team local-controls">
+      <h3>{{ g.homeTeam?.name || 'Local' }}</h3>
+      <h1>{{ scoreHome() }}</h1>
+
+      <label for="homePlayer">Jugador:</label>
+      <select id="homePlayer" [(ngModel)]="selectedHomePlayerId">
+        <option [ngValue]="null">-- Seleccionar --</option>
+        <option *ngFor="let p of g.homeTeam?.players" [ngValue]="p.id">
+          {{ p.number }} - {{ p.name }}
+        </option>
+      </select>
+
+      <div class="buttons">
+        <button [disabled]="!selectedHomePlayerId" (click)="add(g.homeTeamId, selectedHomePlayerId!, 1)">+1</button>
+        <button [disabled]="!selectedHomePlayerId" (click)="add(g.homeTeamId, selectedHomePlayerId!, 2)">+2</button>
+        <button [disabled]="!selectedHomePlayerId" (click)="add(g.homeTeamId, selectedHomePlayerId!, 3)">+3</button>
+        <button class="foul-home" [disabled]="!selectedHomePlayerId" (click)="foul(g.homeTeamId, selectedHomePlayerId!)">Falta</button>
+      </div>
+
+      <p>Faltas: {{ foulsHome() }}</p>
+    </div>
+
+    <!-- VISITANTE -->
+    <div class="team visitor-controls">
+      <h3>{{ g.awayTeam?.name || 'Visitante' }}</h3>
+      <h1>{{ scoreAway() }}</h1>
+
+      <label for="awayPlayer">Jugador:</label>
+      <select id="awayPlayer" [(ngModel)]="selectedAwayPlayerId">
+        <option [ngValue]="null">-- Seleccionar --</option>
+        <option *ngFor="let p of g.awayTeam?.players" [ngValue]="p.id">
+          {{ p.number }} - {{ p.name }}
+        </option>
+      </select>
+
+      <div class="buttons">
+        <button [disabled]="!selectedAwayPlayerId" (click)="add(g.awayTeamId, selectedAwayPlayerId!, 1)">+1</button>
+        <button [disabled]="!selectedAwayPlayerId" (click)="add(g.awayTeamId, selectedAwayPlayerId!, 2)">+2</button>
+        <button [disabled]="!selectedAwayPlayerId" (click)="add(g.awayTeamId, selectedAwayPlayerId!, 3)">+3</button>
+        <button class="foul-away" [disabled]="!selectedAwayPlayerId" (click)="foul(g.awayTeamId, selectedAwayPlayerId!)">Falta</button>
+      </div>
+
+      <p>Faltas: {{ foulsAway() }}</p>
+    </div>
+  </div>
+
+  <!-- CONTROLES DE ESTADO -->
+  <div class="controls-status">
+    <button class="start" (click)="start()">Iniciar</button>
+    <button class="pause" (click)="pauseGame()">Pausar</button>
+    <button class="resume" (click)="resumeGame()">Reanudar</button>
+    <button class="next" (click)="nextQuarter()">Siguiente Cuarto</button>
+    <button class="finish" (click)="finishGame()">Finalizar</button>
+    <button class="cancel" (click)="cancelGame()">Cancelar</button>
+    <button class="suspend" (click)="suspendGame()">Suspender</button>
+    <button class="new-game" (click)="newGame()">Nuevo Partido</button>
+  </div>
+</div>
+
+<!-- MENSAJE SI NO HAY PARTIDO -->
+<ng-template #noGame>
+  <div class="no-game">
+    <p>No hay partido cargado.</p>
+    <button class="new-game" (click)="newGame()">Crear Nuevo Partido</button>
+  </div>
+</ng-template>

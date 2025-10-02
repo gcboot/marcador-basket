@@ -1,0 +1,82 @@
+.scoreboard {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timer h1 {
+  font-size: 3rem;
+  margin: 0;
+}
+
+.duration .controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scores {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+}
+
+.team h1 {
+  font-size: 2.5rem;
+  margin: 0;
+}
+
+.vs {
+  font-size: 2rem;
+  align-self: center;
+}
+
+.controls-main,
+.controls-points,
+.controls-fouls,
+.controls-status {
+  text-align: center;
+  margin: 15px 0;
+}
+
+button {
+  margin: 5px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.start { background: #ffc107; color: black; }
+.reset { background: #6c757d; color: white; }
+.next { background: #007bff; color: white; }
+.new-game { background: #fff; color: black; }
+
+.local-controls button { background: #007bff; color: white; }
+.visitor-controls button { background: #dc3545; color: white; }
+
+.foul-home { background: #007bff; color: white; }
+.foul-away { background: #dc3545; color: white; }
+
+.finish { background: #28a745; color: white; }
+.cancel { background: #6c757d; color: white; }
+.suspend { background: #fd7e14; color: white; }
+.pause { background: #6c757d; color: white; }
+.resume { background: #ffc107; color: black; }
+
+.controls-status {
+  background: #2c2c2c;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
