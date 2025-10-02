@@ -55,6 +55,11 @@ export class GamesComponent implements OnInit {
       return;
     }
 
+    if (this.selectedHomeTeamId === this.selectedAwayTeamId) {
+      alert("Un equipo no puede jugar contra sí mismo");
+      return;
+    }
+
     const nuevo: Partial<Game> = {
       homeTeamId: this.selectedHomeTeamId,
       awayTeamId: this.selectedAwayTeamId,
@@ -62,7 +67,12 @@ export class GamesComponent implements OnInit {
     };
 
     this.gamesService.createGame(nuevo).subscribe({
-      next: () => this.loadGames(),
+      next: () => {
+        this.loadGames();
+        // limpiar selects después de crear
+        this.selectedHomeTeamId = null;
+        this.selectedAwayTeamId = null;
+      },
       error: err => console.error('Error creando juego:', err)
     });
   }
@@ -71,7 +81,6 @@ export class GamesComponent implements OnInit {
     this.router.navigate(['/scoreboard'], { queryParams: { id } });
   }
 
-  // 🔹 Falta este método
   deleteGame(id: number) {
     if (confirm('¿Seguro que deseas eliminar este partido?')) {
       this.gamesService.deleteGame(id).subscribe({

@@ -7,6 +7,7 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = localStorage.getItem('token');
 
+    // ✅ si existe token, agregamos header Authorization
     if (token) {
       const cloned = req.clone({
         setHeaders: {
@@ -16,6 +17,7 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(cloned);
     }
 
+    // ✅ si no hay token, dejamos la request como está
     return next.handle(req);
   }
 }

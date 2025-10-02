@@ -8,7 +8,7 @@ namespace Scoreboard.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // 🔒 requiere token
+    [Authorize] // 🔒 requiere estar logueado con token
     public class EventsController : ControllerBase
     {
         private readonly AppDb _db;
@@ -20,7 +20,7 @@ namespace Scoreboard.Api.Controllers
 
         // 📌 POST /api/events/score
         [HttpPost("score")]
-        [Authorize(Roles = "admin")]
+        [Authorize] // ✅ cualquier usuario autenticado puede sumar puntos
         public async Task<IActionResult> AddScore([FromBody] ScoreEvent req)
         {
             var game = await _db.Games.FindAsync(req.GameId);
@@ -44,15 +44,18 @@ namespace Scoreboard.Api.Controllers
 
         // 📌 POST /api/events/foul
         [HttpPost("foul")]
-        [Authorize(Roles = "admin")]
+        [Authorize] // ✅ cualquier usuario autenticado puede registrar falta
         public async Task<IActionResult> AddFoul([FromBody] ScoreEvent req)
         {
             var game = await _db.Games.FindAsync(req.GameId);
             if (game == null) return NotFound("Juego no encontrado");
 
-            if (req.TeamId == game.HomeTeamId) game.HomeFouls++;
-            else if (req.TeamId == game.AwayTeamId) game.AwayFouls++;
-            else return BadRequest("El TeamId no pertenece al juego");
+            if (req.TeamId == game.HomeTeamId)
+                game.HomeFouls++;
+            else if (req.TeamId == game.AwayTeamId)
+                game.AwayFouls++;
+            else
+                return BadRequest("El TeamId no pertenece al juego");
 
             req.EventType = "foul";
             req.Points = 0; // ⚠️ o -1 si quieres penalizar
@@ -66,7 +69,7 @@ namespace Scoreboard.Api.Controllers
 
         // 📌 GET /api/events/game/{gameId}
         [HttpGet("game/{gameId}")]
-        [AllowAnonymous]
+        [AllowAnonymous] // ✅ cualquier usuario (logueado o no) puede consultar eventos
         public async Task<IActionResult> GetEventsByGame(int gameId)
         {
             var events = await _db.Events

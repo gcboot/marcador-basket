@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // ✅ necesario para ngModel
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GamesService } from '../../services/games.service';
@@ -9,14 +9,13 @@ import { Game } from '../../models/scoreboard.model';
 @Component({
   selector: 'app-scoreboard',
   standalone: true,
-  imports: [CommonModule, FormsModule], // ✅ importa FormsModule
+  imports: [CommonModule, FormsModule],
   templateUrl: './scoreboard.component.html',
   styleUrls: ['./scoreboard.component.css']
 })
 export class ScoreboardComponent implements OnInit, OnDestroy {
   game = signal<Game | null>(null);
 
-  // control de jugadores seleccionados
   selectedHomePlayerId: number | null = null;
   selectedAwayPlayerId: number | null = null;
 
@@ -35,12 +34,10 @@ export class ScoreboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.gamesService.connectToHub();
 
-    // escuchar actualizaciones de SignalR
     this.sub = this.gamesService.onGameUpdated().subscribe(updated => {
       if (updated) this.game.set(updated);
     });
 
-    // cargar juego por query param ?id=xxx
     this.route.queryParams.subscribe(params => {
       const gameId = params['id'];
       if (gameId) {
@@ -56,14 +53,13 @@ export class ScoreboardComponent implements OnInit, OnDestroy {
 
   // -------- API Actions --------
   newGame() {
-    // ⚠️ por ahora IDs fijos, luego puedes agregar selectores de equipos
     const homeTeamId = 1;
     const awayTeamId = 2;
 
     this.gamesService.createGame({
       homeTeamId,
       awayTeamId,
-      status: 'running' // 👈 opcional, depende de lo que tu backend requiera
+      status: 'running'
     }).subscribe(created => {
       this.game.set(created);
       this.reset();
@@ -99,39 +95,21 @@ export class ScoreboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  finishGame() {
+  // -------- Estados del juego como eventos --------
+  private changeStatus(status: string) {
     if (!this.game()) return;
-    this.gamesService.updateStatus(this.game()!.id, 'finished')
+    this.gamesService.updateStatus(this.game()!.id, status)
       .subscribe(g => this.game.set(g));
     this.stopTimer();
   }
 
-  cancelGame() {
-    if (!this.game()) return;
-    this.gamesService.updateStatus(this.game()!.id, 'canceled')
-      .subscribe(g => this.game.set(g));
-    this.stopTimer();
-  }
-
-  suspendGame() {
-    if (!this.game()) return;
-    this.gamesService.updateStatus(this.game()!.id, 'suspended')
-      .subscribe(g => this.game.set(g));
-    this.stopTimer();
-  }
-
-  pauseGame() {
-    if (!this.game()) return;
-    this.gamesService.updateStatus(this.game()!.id, 'paused')
-      .subscribe(g => this.game.set(g));
-    this.stopTimer();
-  }
-
-  resumeGame() {
-    if (!this.game()) return;
-    this.gamesService.updateStatus(this.game()!.id, 'running')
-      .subscribe(g => this.game.set(g));
-    this.start();
+  finishGame() { this.changeStatus('finished'); }
+  cancelGame() { this.changeStatus('canceled'); }
+  suspendGame() { this.changeStatus('suspended'); }
+  pauseGame()   { this.changeStatus('paused'); }
+  resumeGame()  { 
+    this.changeStatus('running'); 
+    this.start(); 
   }
 
   // -------- Timer --------

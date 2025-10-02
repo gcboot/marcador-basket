@@ -74,7 +74,6 @@ namespace Scoreboard.Api.Controllers
 
             return CreatedAtAction(nameof(GetGame), new { id = game.Id }, game);
         }
-
         // 📌 PUT /api/games/{id}
         [HttpPut("{id:int}")]
         [Authorize(Roles = "admin")]
@@ -82,18 +81,23 @@ namespace Scoreboard.Api.Controllers
         {
             if (id != game.Id) return BadRequest();
 
-            var existing = await _db.Games.FindAsync(id);
+            var existing = await _db.Games
+                .Include(g => g.HomeTeam)
+                .Include(g => g.AwayTeam)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
             if (existing == null) return NotFound();
 
-            existing.HomeTeamId = game.HomeTeamId;
-            existing.AwayTeamId = game.AwayTeamId;
+            // ✅ Actualizamos solo los campos necesarios
             existing.Status = game.Status;
             existing.Quarter = game.Quarter;
             existing.HomeScore = game.HomeScore;
             existing.AwayScore = game.AwayScore;
 
             await _db.SaveChangesAsync();
-            return NoContent();
+
+            // ✅ Devolver objeto completo, no un 204 vacío
+            return Ok(existing);
         }
 
         // 📌 DELETE /api/games/{id}

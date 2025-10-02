@@ -18,9 +18,18 @@ var cs = builder.Configuration.GetConnectionString("Sql")
 
 // ---------- Servicios ----------
 builder.Services.AddDbContext<AppDb>(o => o.UseSqlServer(cs));
-builder.Services.AddCors(o => o.AddDefaultPolicy(
-    p => p.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin()
-));
+
+// ✅ Configuración de CORS para Angular + SignalR
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // 👈 tu frontend Angular
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // 👈 necesario para SignalR + JWT
+    });
+});
 
 builder.Services.AddSignalR();
 
@@ -48,6 +57,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+
+        // ✅ Permitir token en SignalR con ?access_token=
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hub/game"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -89,7 +114,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // ---------- Middleware ----------
-app.UseCors();
+app.UseCors("AllowFrontend"); // ✅ usar la política definida
 app.UseAuthentication();
 app.UseAuthorization();
 
