@@ -6,10 +6,10 @@ import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  standalone: true, // ✅ obligatorio en modo standalone
-  imports: [CommonModule, FormsModule], // ✅ módulos necesarios
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'] // si tienes estilos
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
   username = '';
@@ -20,7 +20,15 @@ export class LoginComponent {
 
   login() {
     this.auth.login(this.username, this.password).subscribe({
-      next: () => this.router.navigate(['/games']),
+      next: (res: any) => {
+        // 👇 Guardar token en localStorage
+        if (res && res.token) {
+          localStorage.setItem('token', res.token);
+          this.router.navigate(['/games']);
+        } else {
+          this.errorMessage = 'Respuesta inválida del servidor';
+        }
+      },
       error: () => this.errorMessage = 'Credenciales inválidas'
     });
   }

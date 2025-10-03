@@ -1,82 +1,197 @@
+/* === Contenedor del nuevo partido === */
+.new-game-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 12px 18px;
+  background: #1e1e1e;
+  border-radius: 8px;
+}
+
+.new-game-container label {
+  font-weight: bold;
+  color: #fff;
+}
+
+.new-game-container select {
+  background: #111;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.new-game-container select:focus {
+  outline: none;
+  border-color: #00bcd4;
+}
+
+.btn-new-game {
+  background: #28a745;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.btn-new-game:hover {
+  background: #218838;
+}
+
+/* === Scoreboard general === */
 .scoreboard {
-  background: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #121212;
   color: #fff;
   padding: 20px;
   border-radius: 10px;
-  max-width: 900px;
-  margin: auto;
 }
 
+/* Header */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #1f1f1f;
+  padding: 12px 18px;
+  border-radius: 8px;
 }
 
-.timer h1 {
-  font-size: 3rem;
+.header span {
+  font-size: 14px;
+  color: #bbb;
+}
+
+.header h1, .header h2 {
   margin: 0;
+  color: #fff;
 }
 
-.duration .controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
+/* Scores */
 .scores {
   display: flex;
   justify-content: space-around;
-  margin: 20px 0;
+  gap: 2rem;
+}
+
+.team {
+  flex: 1;
+  background: #1f1f1f;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
 }
 
 .team h1 {
-  font-size: 2.5rem;
+  font-size: 3rem;
+  margin: 10px 0;
+  color: #00bcd4;
+}
+
+.team h3 {
   margin: 0;
+  color: #fff;
 }
 
-.vs {
-  font-size: 2rem;
-  align-self: center;
+.team label {
+  font-weight: bold;
+  display: block;
+  margin: 10px 0 5px;
 }
 
-.controls-main,
-.controls-points,
-.controls-fouls,
+.team select {
+  width: 100%;
+  background: #111;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.buttons button {
+  background: #333;
+  border: none;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.buttons button:hover {
+  background: #555;
+}
+
+.foul-home {
+  background: #ff4444;
+}
+.foul-home:hover {
+  background: #cc0000;
+}
+.foul-away {
+  background: #ff9800;
+}
+.foul-away:hover {
+  background: #e68900;
+}
+
+/* Controles de estado */
 .controls-status {
-  text-align: center;
-  margin: 15px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-button {
-  margin: 5px;
-  padding: 10px 15px;
+.controls-status button {
   border: none;
   border-radius: 6px;
+  padding: 8px 14px;
   font-weight: bold;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-.start { background: #ffc107; color: black; }
-.reset { background: #6c757d; color: white; }
-.next { background: #007bff; color: white; }
-.new-game { background: #fff; color: black; }
+.start { background: #28a745; color: #fff; }
+.start:hover { background: #218838; }
 
-.local-controls button { background: #007bff; color: white; }
-.visitor-controls button { background: #dc3545; color: white; }
+.pause { background: #ffc107; color: #000; }
+.pause:hover { background: #e0a800; }
 
-.foul-home { background: #007bff; color: white; }
-.foul-away { background: #dc3545; color: white; }
+.resume { background: #17a2b8; color: #fff; }
+.resume:hover { background: #117a8b; }
 
-.finish { background: #28a745; color: white; }
-.cancel { background: #6c757d; color: white; }
-.suspend { background: #fd7e14; color: white; }
-.pause { background: #6c757d; color: white; }
-.resume { background: #ffc107; color: black; }
+.next { background: #007bff; color: #fff; }
+.next:hover { background: #0069d9; }
 
-.controls-status {
-  background: #2c2c2c;
-  padding: 15px;
-  border-radius: 8px;
-  margin-top: 20px;
+.finish { background: #6f42c1; color: #fff; }
+.finish:hover { background: #5936a0; }
+
+.cancel { background: #dc3545; color: #fff; }
+.cancel:hover { background: #c82333; }
+
+.suspend { background: #fd7e14; color: #fff; }
+.suspend:hover { background: #e8590c; }
+
+/* Mensaje no game */
+.no-game {
+  text-align: center;
+  color: #bbb;
+  margin-top: 2rem;
 }

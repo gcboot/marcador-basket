@@ -1,3 +1,21 @@
+<!-- FORMULARIO PARA CREAR PARTIDO -->
+<div class="new-game-container" *ngIf="!game()">
+  <label for="homeTeam">Local:</label>
+  <select id="homeTeam" [(ngModel)]="selectedHomeTeamId">
+    <option [ngValue]="null">Selecciona equipo</option>
+    <option *ngFor="let t of teams" [ngValue]="t.id">{{ t.name }}</option>
+  </select>
+
+  <label for="awayTeam">Visitante:</label>
+  <select id="awayTeam" [(ngModel)]="selectedAwayTeamId">
+    <option [ngValue]="null">Selecciona equipo</option>
+    <option *ngFor="let t of teams" [ngValue]="t.id">{{ t.name }}</option>
+  </select>
+
+  <button class="btn-new-game" (click)="createNewGame()">➕ Nuevo Partido</button>
+</div>
+
+<!-- MARCADOR -->
 <div class="scoreboard" *ngIf="game() as g; else noGame">
   <!-- HEADER -->
   <div class="header">
@@ -79,7 +97,6 @@
     <button class="finish" (click)="finishGame()">Finalizar</button>
     <button class="cancel" (click)="cancelGame()">Cancelar</button>
     <button class="suspend" (click)="suspendGame()">Suspender</button>
-    <button class="new-game" (click)="newGame()">Nuevo Partido</button>
   </div>
 </div>
 
@@ -87,6 +104,5 @@
 <ng-template #noGame>
   <div class="no-game">
     <p>No hay partido cargado.</p>
-    <button class="new-game" (click)="newGame()">Crear Nuevo Partido</button>
   </div>
 </ng-template>

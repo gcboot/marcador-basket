@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Scoreboard.Api.Data;
 using Scoreboard.Api.Hubs;
 using Scoreboard.Api.Models;
+using Scoreboard.Api.Models.DTOs; // 👈 importante para usar CreateGameRequest
 
 namespace Scoreboard.Api.Controllers
 {
@@ -55,17 +56,22 @@ namespace Scoreboard.Api.Controllers
         // 📌 POST /api/games
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> CreateGame([FromBody] Game game)
+        public async Task<IActionResult> CreateGame([FromBody] CreateGameRequest dto)
         {
-            if (game.HomeTeamId == 0 || game.AwayTeamId == 0)
+            if (dto.HomeTeamId == 0 || dto.AwayTeamId == 0)
                 return BadRequest("Debes especificar equipos local y visitante");
 
-            if (!await _db.Teams.AnyAsync(t => t.Id == game.HomeTeamId) ||
-                !await _db.Teams.AnyAsync(t => t.Id == game.AwayTeamId))
+            if (!await _db.Teams.AnyAsync(t => t.Id == dto.HomeTeamId) ||
+                !await _db.Teams.AnyAsync(t => t.Id == dto.AwayTeamId))
                 return BadRequest("Alguno de los equipos no existe");
 
-            game.StartedAt = DateTimeOffset.UtcNow;
-            game.Status = "paused";
+            var game = new Game
+            {
+                HomeTeamId = dto.HomeTeamId,
+                AwayTeamId = dto.AwayTeamId,
+                Status = "paused",
+                StartedAt = DateTimeOffset.UtcNow
+            };
 
             _db.Games.Add(game);
             await _db.SaveChangesAsync();
@@ -74,6 +80,7 @@ namespace Scoreboard.Api.Controllers
 
             return CreatedAtAction(nameof(GetGame), new { id = game.Id }, game);
         }
+
         // 📌 PUT /api/games/{id}
         [HttpPut("{id:int}")]
         [Authorize(Roles = "admin")]
@@ -88,7 +95,6 @@ namespace Scoreboard.Api.Controllers
 
             if (existing == null) return NotFound();
 
-            // ✅ Actualizamos solo los campos necesarios
             existing.Status = game.Status;
             existing.Quarter = game.Quarter;
             existing.HomeScore = game.HomeScore;
@@ -96,7 +102,6 @@ namespace Scoreboard.Api.Controllers
 
             await _db.SaveChangesAsync();
 
-            // ✅ Devolver objeto completo, no un 204 vacío
             return Ok(existing);
         }
 
@@ -126,6 +131,18 @@ namespace Scoreboard.Api.Controllers
 
             if (g.Quarter < 4) g.Quarter++;
 
+            // ✅ Registrar evento de cambio de cuarto
+            var ev = new ScoreEvent
+            {
+                GameId = g.Id,
+                TeamId = null,
+                PlayerId = null,
+                EventType = "quarter",
+                Points = 0,
+                At = DateTimeOffset.UtcNow
+            };
+            _db.Events.Add(ev);
+
             await _db.SaveChangesAsync();
 
             await _hub.Clients.Group($"game-{id}")
@@ -152,6 +169,18 @@ namespace Scoreboard.Api.Controllers
                 g.EndedAt = DateTimeOffset.UtcNow;
             else
                 g.EndedAt = null;
+
+            // ✅ Registrar evento de cambio de estado
+            var ev = new ScoreEvent
+            {
+                GameId = g.Id,
+                TeamId = null,
+                PlayerId = null,
+                EventType = status,
+                Points = 0,
+                At = DateTimeOffset.UtcNow
+            };
+            _db.Events.Add(ev);
 
             await _db.SaveChangesAsync();
 

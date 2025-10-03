@@ -1,4 +1,5 @@
 export type GameStatus = 'running' | 'paused' | 'finished' | 'canceled' | 'suspended';
+export type EventType = 'score' | 'foul' | 'quarter' | 'finished' | 'paused' | 'canceled' | 'suspended';
 
 export interface Player {
   id: number;
@@ -10,15 +11,17 @@ export interface Player {
 export interface Team {
   id: number;
   name: string;
-  players: Player[];
+  city?: string;
+  logo?: string;
+  players?: Player[];
 }
 
 export interface Event {
   id: number;
   gameId: number;
   teamId: number;
-  playerId: number;
-  eventType: string; // "score" | "foul"
+  playerId?: number | null;   
+  eventType: EventType;       // ✅ tipado más fuerte
   points: number;
   at: string;
   player?: Player;
@@ -38,15 +41,14 @@ export interface Game {
 
   homeTeamId: number;
   awayTeamId: number;
-  homeTeam: Team | null;
-  awayTeam: Team | null;
+  homeTeam?: Team | null;     
+  awayTeam?: Team | null;
 
-  events: Event[];
+  events: Event[];            // ✅ siempre presente (aunque sea vacío)
 }
-
 
 export interface User {
   id: number;
   username: string;
-  rol: string;   // 👈 debe coincidir con la columna Rol de tu DB
+  rol: string;
 }

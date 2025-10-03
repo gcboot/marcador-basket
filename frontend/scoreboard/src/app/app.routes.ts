@@ -2,7 +2,6 @@
 import { Routes } from '@angular/router';
 import { ScoreboardComponent } from './components/scoreboard/scoreboard.component';
 import { GamesComponent } from './components/games/games.component';
-
 import { LoginComponent } from './components/login/login.component';
 
 // Users
@@ -17,28 +16,32 @@ import { PlayerFormComponent } from './components/players/player-form.component'
 import { TeamsListComponent } from './components/teams/teams-list.component';
 import { TeamsFormComponent } from './components/teams/teams-form.component';
 
-export const routes: Routes = [
-  { path: 'scoreboard', component: ScoreboardComponent },
-  { path: 'games', component: GamesComponent },
+// 👇 Importamos el guard
+import { authGuard } from './guards/auth.guard';
 
+export const routes: Routes = [
   { path: 'login', component: LoginComponent },
 
+  // 👇 Todas estas rutas están protegidas
+  { path: 'scoreboard', component: ScoreboardComponent, canActivate: [authGuard] },
+  { path: 'games', component: GamesComponent, canActivate: [authGuard] },
+
   // Users
-  { path: 'users', component: UsersListComponent },
-  { path: 'users/create', component: UserFormComponent },
-  { path: 'users/edit/:id', component: UserFormComponent },
+  { path: 'users', component: UsersListComponent, canActivate: [authGuard] },
+  { path: 'users/create', component: UserFormComponent, canActivate: [authGuard] },
+  { path: 'users/edit/:id', component: UserFormComponent, canActivate: [authGuard] },
 
   // Players
-  { path: 'players', component: PlayersListComponent },
-  { path: 'players/create', component: PlayerFormComponent },
-  { path: 'players/edit/:id', component: PlayerFormComponent },
+  { path: 'players', component: PlayersListComponent, canActivate: [authGuard] },
+  { path: 'players/create', component: PlayerFormComponent, canActivate: [authGuard] },
+  { path: 'players/edit/:id', component: PlayerFormComponent, canActivate: [authGuard] },
 
   // Teams
-  { path: 'teams', component: TeamsListComponent },
-  { path: 'teams/create', component: TeamsFormComponent },
-  { path: 'teams/edit/:id', component: TeamsFormComponent },
+  { path: 'teams', component: TeamsListComponent, canActivate: [authGuard] },
+  { path: 'teams/create', component: TeamsFormComponent, canActivate: [authGuard] },
+  { path: 'teams/edit/:id', component: TeamsFormComponent, canActivate: [authGuard] },
 
-  // Default
-  { path: '', redirectTo: 'scoreboard', pathMatch: 'full' },
-  { path: '**', redirectTo: 'scoreboard' } // 👈 fallback si escriben mal la ruta
+  // Default → si no hay login, mandar a /login
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' }
 ];

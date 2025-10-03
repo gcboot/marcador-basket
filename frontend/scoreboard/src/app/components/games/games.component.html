@@ -5,16 +5,16 @@
   <label>
     Local:
     <select [(ngModel)]="selectedHomeTeamId" name="homeTeamId">
-      <option [ngValue]="null">Selecciona equipo</option>
-      <option *ngFor="let team of teams" [ngValue]="team.id">{{ team.name }}</option>
+      <option [value]="null">Selecciona equipo</option>
+      <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
     </select>
   </label>
 
   <label>
     Visitante:
     <select [(ngModel)]="selectedAwayTeamId" name="awayTeamId">
-      <option [ngValue]="null">Selecciona equipo</option>
-      <option *ngFor="let team of teams" [ngValue]="team.id">{{ team.name }}</option>
+      <option [value]="null">Selecciona equipo</option>
+      <option *ngFor="let team of teams" [value]="team.id">{{ team.name }}</option>
     </select>
   </label>
 

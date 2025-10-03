@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { GamesService } from '../../services/games.service';
-import { Game } from '../../models/scoreboard.model';
+import { Game, Event,Team } from '../../models/scoreboard.model'; // 👈 Asegúrate de tener el modelo Team
 
 @Component({
   selector: 'app-scoreboard',
@@ -16,9 +16,16 @@ import { Game } from '../../models/scoreboard.model';
 export class ScoreboardComponent implements OnInit, OnDestroy {
   game = signal<Game | null>(null);
 
+  // jugadores seleccionados
   selectedHomePlayerId: number | null = null;
   selectedAwayPlayerId: number | null = null;
 
+  // equipos para crear un nuevo partido
+  teams: Team[] = [];
+  selectedHomeTeamId: number | null = null;
+  selectedAwayTeamId: number | null = null;
+
+  // timer
   quarterMinutes = signal(10);
   minutes = signal(10);
   seconds = signal(0);
@@ -38,6 +45,11 @@ export class ScoreboardComponent implements OnInit, OnDestroy {
       if (updated) this.game.set(updated);
     });
 
+    // cargar equipos desde API
+    this.gamesService.getTeams().subscribe(list => {
+      this.teams = list;
+    });
+
     this.route.queryParams.subscribe(params => {
       const gameId = params['id'];
       if (gameId) {
@@ -52,13 +64,15 @@ export class ScoreboardComponent implements OnInit, OnDestroy {
   }
 
   // -------- API Actions --------
-  newGame() {
-    const homeTeamId = 1;
-    const awayTeamId = 2;
+  createNewGame() {
+    if (!this.selectedHomeTeamId || !this.selectedAwayTeamId) {
+      alert("Debes seleccionar ambos equipos");
+      return;
+    }
 
     this.gamesService.createGame({
-      homeTeamId,
-      awayTeamId,
+      homeTeamId: this.selectedHomeTeamId,
+      awayTeamId: this.selectedAwayTeamId,
       status: 'running'
     }).subscribe(created => {
       this.game.set(created);

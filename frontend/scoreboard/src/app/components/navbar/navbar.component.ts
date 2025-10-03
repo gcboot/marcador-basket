@@ -61,3 +61,4 @@ export class NavbarComponent {
     window.location.href = '/login';
   }
 }
+

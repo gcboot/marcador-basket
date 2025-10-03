@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GamesService } from '../../services/games.service';
-import { Game } from '../../models/scoreboard.model';
-import { HttpClient } from '@angular/common/http';
+import { Game, Team } from '../../models/scoreboard.model';
 
 @Component({
   selector: 'app-games',
@@ -15,14 +14,13 @@ import { HttpClient } from '@angular/common/http';
 })
 export class GamesComponent implements OnInit {
   games: Game[] = [];
-  teams: any[] = [];
+  teams: Team[] = [];
   selectedHomeTeamId: number | null = null;
   selectedAwayTeamId: number | null = null;
 
   constructor(
     private router: Router,
-    private gamesService: GamesService,
-    private http: HttpClient
+    private gamesService: GamesService
   ) {}
 
   ngOnInit() {
@@ -36,35 +34,40 @@ export class GamesComponent implements OnInit {
         this.games = data;
       },
       error: (err) => {
-        console.error('Error cargando juegos:', err);
+        console.error('❌ Error cargando juegos:', err);
       }
     });
   }
 
   loadTeams() {
-    this.http.get<any[]>(`http://localhost:5071/api/Teams`)
-      .subscribe({
-        next: data => this.teams = data,
-        error: err => console.error('Error cargando equipos:', err)
-      });
+    this.gamesService.getTeams().subscribe({
+      next: (data: Team[]) => {
+        this.teams = data;
+      },
+      error: (err) => {
+        console.error('❌ Error cargando equipos:', err);
+      }
+    });
   }
 
   createGame() {
     if (!this.selectedHomeTeamId || !this.selectedAwayTeamId) {
-      alert("Debes seleccionar ambos equipos");
+      alert("⚠️ Debes seleccionar ambos equipos");
       return;
     }
 
     if (this.selectedHomeTeamId === this.selectedAwayTeamId) {
-      alert("Un equipo no puede jugar contra sí mismo");
+      alert("⚠️ Un equipo no puede jugar contra sí mismo");
       return;
     }
 
     const nuevo: Partial<Game> = {
-      homeTeamId: this.selectedHomeTeamId,
-      awayTeamId: this.selectedAwayTeamId,
+      homeTeamId: Number(this.selectedHomeTeamId),
+      awayTeamId: Number(this.selectedAwayTeamId),
       status: 'paused'
     };
+
+    console.log("📤 Enviando al backend:", nuevo);
 
     this.gamesService.createGame(nuevo).subscribe({
       next: () => {
@@ -73,7 +76,10 @@ export class GamesComponent implements OnInit {
         this.selectedHomeTeamId = null;
         this.selectedAwayTeamId = null;
       },
-      error: err => console.error('Error creando juego:', err)
+      error: err => {
+        console.error('❌ Error creando juego:', err);
+        alert("No se pudo crear el juego. Verifica que los equipos existan.");
+      }
     });
   }
 
@@ -85,7 +91,7 @@ export class GamesComponent implements OnInit {
     if (confirm('¿Seguro que deseas eliminar este partido?')) {
       this.gamesService.deleteGame(id).subscribe({
         next: () => this.loadGames(),
-        error: err => console.error('Error eliminando juego:', err)
+        error: err => console.error('❌ Error eliminando juego:', err)
       });
     }
   }
