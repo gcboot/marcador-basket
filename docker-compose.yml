@@ -1,27 +1,41 @@
-services:
-  api:
-    build:
-      context: ./backend/Scoreboard.Api
-      dockerfile: Dockerfile
-    container_name: scoreboard-api
-    networks:
-      - scoreboard-net
-    environment:
-      ASPNETCORE_URLS: "http://+:5071"
-      ConnectionStrings__Sql: "Server=sqlserver_main,1433;Database=ScoreboardDB;User Id=sa;Password=Anevictor1712@;TrustServerCertificate=True;"
-    ports:
-      - "5071:5071"
+version: "3.9"
 
-  frontend:
-    build:
-      context: ./frontend/scoreboard
-      dockerfile: Dockerfile
-    container_name: scoreboard-frontend
+services:
+  marcador-api:
+    build: ./backend
+    container_name: marcador-api
+    restart: always
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=sqlserver_main,1433;Database=ScoreboardDB;User ID=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;
+    depends_on:
+      - sqlserver_main
     networks:
-      - scoreboard-net
+      - infraestructura_network
+
+  marcador-frontend:
+    build: ./frontend
+    container_name: marcador-frontend
+    restart: always
+    depends_on:
+      - marcador-api
+    networks:
+      - infraestructura_network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
     ports:
       - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - marcador-api
+      - marcador-frontend
+    networks:
+      - infraestructura_network
 
 networks:
-  scoreboard-net:
-    external: true
+  infraestructura_network:
+    driver: bridge
