@@ -84,6 +84,7 @@ export class ScoreboardComponent implements OnInit, OnDestroy {
   connectToGame(id: number) {
     this.gamesService.getGame(id).subscribe(found => {
       this.game.set(found);
+      this.gamesService.reconnectToGameHub(id);
       this.reset();
     });
   }

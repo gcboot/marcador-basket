@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Scoreboard.Api.Data;
 using Scoreboard.Api.Hubs;
 using Scoreboard.Api.Models;
-using Scoreboard.Api.Models.DTOs; // 👈 importante para usar CreateGameRequest
+using Scoreboard.Api.Models.DTOs;
 
 namespace Scoreboard.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // 🔒 requiere token
+    [Authorize]
     public class GamesController : ControllerBase
     {
         private readonly AppDb _db;
@@ -43,13 +43,14 @@ namespace Scoreboard.Api.Controllers
         public async Task<IActionResult> GetGame(int id)
         {
             var game = await _db.Games
-                .Include(g => g.HomeTeam)
-                .Include(g => g.AwayTeam)
-                .Include(g => g.Events)
-                    .ThenInclude(e => e.Player)
+                .Include(g => g.HomeTeam)!.ThenInclude(t => t.Players)
+                .Include(g => g.AwayTeam)!.ThenInclude(t => t.Players)
+                .Include(g => g.Events).ThenInclude(e => e.Player)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
-            if (game == null) return NotFound();
+            if (game == null)
+                return NotFound();
+
             return Ok(game);
         }
 
@@ -70,15 +71,24 @@ namespace Scoreboard.Api.Controllers
                 HomeTeamId = dto.HomeTeamId,
                 AwayTeamId = dto.AwayTeamId,
                 Status = "paused",
+                Quarter = 1,
+                HomeScore = 0,
+                AwayScore = 0,
                 StartedAt = DateTimeOffset.UtcNow
             };
 
             _db.Games.Add(game);
             await _db.SaveChangesAsync();
 
-            await _hub.Clients.All.SendAsync("GameCreated", game);
+            // 🔹 Cargar con relaciones completas para emitir
+            var created = await _db.Games
+                .Include(g => g.HomeTeam)!.ThenInclude(t => t.Players)
+                .Include(g => g.AwayTeam)!.ThenInclude(t => t.Players)
+                .FirstAsync(g => g.Id == game.Id);
 
-            return CreatedAtAction(nameof(GetGame), new { id = game.Id }, game);
+            await _hub.Clients.All.SendAsync("GameCreated", created);
+
+            return CreatedAtAction(nameof(GetGame), new { id = game.Id }, created);
         }
 
         // 📌 PUT /api/games/{id}
@@ -89,8 +99,8 @@ namespace Scoreboard.Api.Controllers
             if (id != game.Id) return BadRequest();
 
             var existing = await _db.Games
-                .Include(g => g.HomeTeam)
-                .Include(g => g.AwayTeam)
+                .Include(g => g.HomeTeam)!.ThenInclude(t => t.Players)
+                .Include(g => g.AwayTeam)!.ThenInclude(t => t.Players)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             if (existing == null) return NotFound();
@@ -131,24 +141,28 @@ namespace Scoreboard.Api.Controllers
 
             if (g.Quarter < 4) g.Quarter++;
 
-            // ✅ Registrar evento de cambio de cuarto
+            // 🔹 Registrar evento
             var ev = new ScoreEvent
             {
                 GameId = g.Id,
-                TeamId = null,
-                PlayerId = null,
                 EventType = "quarter",
                 Points = 0,
                 At = DateTimeOffset.UtcNow
             };
             _db.Events.Add(ev);
-
             await _db.SaveChangesAsync();
 
-            await _hub.Clients.Group($"game-{id}")
-                .SendAsync("QuarterUpdated", g.Quarter);
+            // 🔹 Cargar relaciones completas antes de emitir
+            var updated = await _db.Games
+                .Include(x => x.HomeTeam)!.ThenInclude(t => t.Players)
+                .Include(x => x.AwayTeam)!.ThenInclude(t => t.Players)
+                .Include(x => x.Events).ThenInclude(e => e.Player)
+                .FirstAsync(x => x.Id == g.Id);
 
-            return Ok(g);
+            await _hub.Clients.Group($"game-{id}")
+                .SendAsync("QuarterUpdated", updated);
+
+            return Ok(updated);
         }
 
         // 📌 POST /api/games/{id}/finish?status={status}
@@ -164,30 +178,32 @@ namespace Scoreboard.Api.Controllers
                 return BadRequest("status debe ser running|paused|finished|canceled|suspended");
 
             g.Status = status;
+            g.EndedAt = (status is "finished" or "canceled" or "suspended")
+                ? DateTimeOffset.UtcNow
+                : null;
 
-            if (status is "finished" or "canceled" or "suspended")
-                g.EndedAt = DateTimeOffset.UtcNow;
-            else
-                g.EndedAt = null;
-
-            // ✅ Registrar evento de cambio de estado
+            // 🔹 Registrar evento
             var ev = new ScoreEvent
             {
                 GameId = g.Id,
-                TeamId = null,
-                PlayerId = null,
                 EventType = status,
                 Points = 0,
                 At = DateTimeOffset.UtcNow
             };
             _db.Events.Add(ev);
-
             await _db.SaveChangesAsync();
 
-            await _hub.Clients.Group($"game-{id}")
-                .SendAsync("GameStatusUpdated", new { g.Id, g.Status, g.EndedAt });
+            // 🔹 Cargar relaciones completas antes de emitir
+            var updated = await _db.Games
+                .Include(x => x.HomeTeam)!.ThenInclude(t => t.Players)
+                .Include(x => x.AwayTeam)!.ThenInclude(t => t.Players)
+                .Include(x => x.Events).ThenInclude(e => e.Player)
+                .FirstAsync(x => x.Id == g.Id);
 
-            return Ok(g);
+            await _hub.Clients.Group($"game-{id}")
+                .SendAsync("GameStatusUpdated", updated);
+
+            return Ok(updated);
         }
     }
 }

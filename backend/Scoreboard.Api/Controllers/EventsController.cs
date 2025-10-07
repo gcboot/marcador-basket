@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Scoreboard.Api.Data;
 using Scoreboard.Api.Models;
 using Scoreboard.Api.Hubs;
+using Scoreboard.Api.Models.DTOs;
 
 namespace Scoreboard.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // 🔒 requiere estar logueado con token
+    [Authorize]
     public class EventsController : ControllerBase
     {
         private readonly AppDb _db;
@@ -24,15 +25,14 @@ namespace Scoreboard.Api.Controllers
 
         // 📌 POST /api/events/score
         [HttpPost("score")]
-        [Authorize]
-        public async Task<IActionResult> AddScore([FromBody] ScoreEvent req)
+        public async Task<IActionResult> AddScore([FromBody] CreateScoreEventDto req)
         {
             if (req == null) return BadRequest("Evento inválido");
 
             var game = await _db.Games.FindAsync(req.GameId);
             if (game == null) return NotFound("Juego no encontrado");
 
-            // ✅ ya no hace falta la variable intermedia "g"
+            // 🔹 Actualizar marcador según el equipo
             if (req.TeamId == game.HomeTeamId)
                 game.HomeScore += req.Points;
             else if (req.TeamId == game.AwayTeamId)
@@ -40,9 +40,10 @@ namespace Scoreboard.Api.Controllers
             else
                 return BadRequest("El TeamId no pertenece al juego");
 
+            // 🔹 Crear registro de evento
             var ev = new ScoreEvent
             {
-                GameId = game.Id,
+                GameId = req.GameId,
                 TeamId = req.TeamId,
                 PlayerId = req.PlayerId,
                 Points = req.Points,
@@ -53,6 +54,7 @@ namespace Scoreboard.Api.Controllers
             _db.Events.Add(ev);
             await _db.SaveChangesAsync();
 
+            // 🔹 Cargar juego actualizado con relaciones
             var updated = await _db.Games
                 .Include(x => x.HomeTeam)!.ThenInclude(t => t.Players)
                 .Include(x => x.AwayTeam)!.ThenInclude(t => t.Players)
@@ -61,22 +63,22 @@ namespace Scoreboard.Api.Controllers
 
             if (updated == null) return NotFound("Juego no encontrado tras actualizar");
 
-            await _hub.Clients.Group($"game-{game.Id}")
-                .SendAsync("ScoreUpdated", updated);
+            // 🔹 Emitir actualización a todos los clientes
+            await _hub.Clients.All.SendAsync("ScoreUpdated", updated);
 
             return Ok(updated);
         }
 
         // 📌 POST /api/events/foul
         [HttpPost("foul")]
-        [Authorize]
-        public async Task<IActionResult> AddFoul([FromBody] ScoreEvent req)
+        public async Task<IActionResult> AddFoul([FromBody] CreateScoreEventDto req)
         {
             if (req == null) return BadRequest("Evento inválido");
 
             var game = await _db.Games.FindAsync(req.GameId);
             if (game == null) return NotFound("Juego no encontrado");
 
+            // 🔹 Incrementar faltas
             if (req.TeamId == game.HomeTeamId)
                 game.HomeFouls++;
             else if (req.TeamId == game.AwayTeamId)
@@ -84,9 +86,10 @@ namespace Scoreboard.Api.Controllers
             else
                 return BadRequest("El TeamId no pertenece al juego");
 
+            // 🔹 Registrar evento
             var ev = new ScoreEvent
             {
-                GameId = game.Id,
+                GameId = req.GameId,
                 TeamId = req.TeamId,
                 PlayerId = req.PlayerId,
                 Points = 0,
@@ -97,6 +100,7 @@ namespace Scoreboard.Api.Controllers
             _db.Events.Add(ev);
             await _db.SaveChangesAsync();
 
+            // 🔹 Cargar juego actualizado
             var updated = await _db.Games
                 .Include(x => x.HomeTeam)!.ThenInclude(t => t.Players)
                 .Include(x => x.AwayTeam)!.ThenInclude(t => t.Players)
@@ -105,8 +109,7 @@ namespace Scoreboard.Api.Controllers
 
             if (updated == null) return NotFound("Juego no encontrado tras actualizar");
 
-            await _hub.Clients.Group($"game-{game.Id}")
-                .SendAsync("FoulUpdated", updated);
+            await _hub.Clients.All.SendAsync("ScoreUpdated", updated);
 
             return Ok(updated);
         }

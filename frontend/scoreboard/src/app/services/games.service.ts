@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import { APP_CONFIG, AppConfig } from '../app.config';
-import { Game, Event, Team } from '../models/scoreboard.model';
+import { Game, Team } from '../models/scoreboard.model';
 
 @Injectable({ providedIn: 'root' })
 export class GamesService {
@@ -16,7 +16,7 @@ export class GamesService {
     @Inject(APP_CONFIG) private config: AppConfig
   ) {}
 
-  // -------- helper para headers con token --------
+  // -------- Headers con token --------
   private authHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
@@ -25,50 +25,50 @@ export class GamesService {
     });
   }
 
-  // -------- REST API --------
+  // -------- Juegos --------
   getGames(): Observable<Game[]> {
-    return this.http.get<Game[]>(`${this.config.apiUrl}/Games`, { headers: this.authHeaders() });
+    return this.http.get<Game[]>(`${this.config.apiUrl}/games`, { headers: this.authHeaders() });
   }
 
   getGame(id: number): Observable<Game> {
-    return this.http.get<Game>(`${this.config.apiUrl}/Games/${id}`, { headers: this.authHeaders() });
+    return this.http.get<Game>(`${this.config.apiUrl}/games/${id}`, { headers: this.authHeaders() });
   }
 
   createGame(game: Partial<Game>): Observable<Game> {
-    return this.http.post<Game>(`${this.config.apiUrl}/Games`, game, { headers: this.authHeaders() });
+    return this.http.post<Game>(`${this.config.apiUrl}/games`, game, { headers: this.authHeaders() });
   }
 
   updateGame(id: number, game: Partial<Game>): Observable<void> {
-    return this.http.put<void>(`${this.config.apiUrl}/Games/${id}`, game, { headers: this.authHeaders() });
+    return this.http.put<void>(`${this.config.apiUrl}/games/${id}`, game, { headers: this.authHeaders() });
   }
 
   deleteGame(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.config.apiUrl}/Games/${id}`, { headers: this.authHeaders() });
+    return this.http.delete<void>(`${this.config.apiUrl}/games/${id}`, { headers: this.authHeaders() });
   }
 
-  // -------- NUEVO: obtener equipos --------
+  // -------- Equipos --------
   getTeams(): Observable<Team[]> {
-    return this.http.get<Team[]>(`${this.config.apiUrl}/Teams`, { headers: this.authHeaders() });
+    return this.http.get<Team[]>(`${this.config.apiUrl}/teams`, { headers: this.authHeaders() });
   }
 
   // -------- Eventos --------
   addScore(gameId: number, teamId: number, playerId: number | null, points: number): Observable<Game> {
-    const body: Partial<Event> = { gameId, teamId, playerId: playerId ?? null, points, eventType: 'score' };
-    // 👇 usar la ruta exactamente como está en Swagger: con E mayúscula
-    return this.http.post<Game>(`${this.config.apiUrl}/Events/score`, body, { headers: this.authHeaders() });
+    const body = { gameId, teamId, playerId, points };
+    // 👇 Importante: usa minúscula "events"
+    return this.http.post<Game>(`${this.config.apiUrl}/events/score`, body, { headers: this.authHeaders() });
   }
 
   addFoul(gameId: number, teamId: number, playerId: number | null): Observable<Game> {
-    const body: Partial<Event> = { gameId, teamId, playerId: playerId ?? null, eventType: 'foul', points: 0 };
-    return this.http.post<Game>(`${this.config.apiUrl}/Events/foul`, body, { headers: this.authHeaders() });
+    const body = { gameId, teamId, playerId };
+    return this.http.post<Game>(`${this.config.apiUrl}/events/foul`, body, { headers: this.authHeaders() });
   }
 
   nextQuarter(id: number): Observable<Game> {
-    return this.http.post<Game>(`${this.config.apiUrl}/Games/${id}/quarter/next`, {}, { headers: this.authHeaders() });
+    return this.http.post<Game>(`${this.config.apiUrl}/games/${id}/quarter/next`, {}, { headers: this.authHeaders() });
   }
 
   updateStatus(id: number, status: string): Observable<Game> {
-    return this.http.post<Game>(`${this.config.apiUrl}/Games/${id}/finish?status=${status}`, {}, { headers: this.authHeaders() });
+    return this.http.post<Game>(`${this.config.apiUrl}/games/${id}/finish?status=${status}`, {}, { headers: this.authHeaders() });
   }
 
   // -------- SIGNALR --------
@@ -82,16 +82,12 @@ export class GamesService {
       .then(() => console.log('✅ Conectado a SignalR'))
       .catch(err => console.error('❌ Error conectando SignalR:', err));
 
+    // Escuchar eventos del backend
     this.hubConnection.on('GameCreated', (game: Game) => this.emitUpdate(game));
     this.hubConnection.on('ScoreUpdated', (update: Game) => this.emitUpdate(update));
     this.hubConnection.on('FoulUpdated', (update: Game) => this.emitUpdate(update));
     this.hubConnection.on('GameStatusUpdated', (update: Game) => this.emitUpdate(update));
-    this.hubConnection.on('QuarterUpdated', (quarter: number) => {
-      if (this.currentGame) {
-        this.currentGame.quarter = quarter;
-        this.gameUpdated$.next(this.currentGame);
-      }
-    });
+    this.hubConnection.on('QuarterUpdated', (update: Game) => this.emitUpdate(update));
 
     this.hubConnection.on('GameDeleted', (gameId: number) => {
       console.log(`🗑 Juego eliminado desde SignalR: ${gameId}`);
@@ -108,5 +104,14 @@ export class GamesService {
 
   onGameUpdated(): Observable<Game> {
     return this.gameUpdated$.asObservable();
+  }
+
+  // Permite reconectar manualmente a un juego específico (útil al cambiar cuarto)
+  reconnectToGameHub(gameId: number) {
+    if (this.hubConnection?.state === 'Connected') {
+      this.hubConnection.invoke('JoinGame', gameId)
+        .then(() => console.log(`📡 Reconectado al grupo game-${gameId}`))
+        .catch(err => console.warn('⚠️ No se pudo unir al grupo:', err));
+    }
   }
 }
